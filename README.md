@@ -216,3 +216,51 @@ This project is open source and available under the MIT License.
 - Dataset: New Plant Diseases Dataset from Kaggle
 - Framework: TensorFlow/Keras
 - Platform: Google Colab
+
+## Results and Visualizations
+
+### 1. Training Accuracy Visualization
+
+The model's training progress is visualized through an accuracy plot:
+
+**Accuracy vs Epochs Plot:**
+- **Red Line**: Training Accuracy - Shows progressive improvement from ~18% (epoch 1) to ~76% (epoch 10)
+- **Blue Line**: Validation Accuracy - Demonstrates fluctuating performance with a general upward trend, reaching ~75% by epoch 10
+- The plot illustrates the learning curve and helps identify potential overfitting
+- Both training and validation accuracies converge around 75-76%, indicating good generalization
+
+![Accuracy Visualization](images/accuracy_plot.png)
+*Figure 1: Training and Validation Accuracy over 10 Epochs*
+
+### 2. Sample Prediction - Test Input
+
+**Input Image:**
+A test image of a plant leaf showing symptoms of disease is fed into the trained model.
+
+![Test Image Input](images/test_image_input.png)
+*Figure 2: Test leaf image used as model input*
+
+### 3. Model Prediction Output
+
+**Prediction Result:**
+The model successfully analyzes the input image and predicts the disease classification.
+
+![Prediction Output](images/prediction_output.png)
+*Figure 3: Model prediction showing "Disease Name: Potato__Late_blight"*
+
+**Key Observations:**
+- The model correctly identifies the disease type from the leaf image
+- Prediction index: 21 (corresponding to Potato__Late_blight class)
+- The output demonstrates the model's capability to classify plant diseases from real-world images
+
+### Model Performance Summary
+
+Based on the visualizations and outputs:
+- **Training Accuracy**: 76.71%
+- **Validation Accuracy**: 75.11%
+- **Performance**: The model shows consistent performance across training and validation sets
+- **Application**: Successfully identifies plant diseases from leaf images across 38 different disease categories
+
+---
+
+**Note**: To view the actual images from the Google Colab notebook, please refer to the original Colab file or add the images to the `images/` folder in this repository.
