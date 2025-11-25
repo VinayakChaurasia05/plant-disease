@@ -7,23 +7,30 @@ Original file is located at
     https://colab.research.google.com/drive/1_Ivpus2PmHuXk2T6lS6TPCk_24eFiD1w
 """
 
-import kagglehub
+# Mount Google Drive
+from google.colab import drive
+drive.mount('/content/drive')
 
+# Download dataset from kagglehub
+import kagglehub
 # Download latest version
 path = kagglehub.dataset_download("vipoooool/new-plant-diseases-dataset")
-
 print("Path to dataset files:", path)
 
+# Create input directory
 !mkdir -p ~/.kaggle/input/new-plant-diseases-dataset
 
+# Import libraries
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sns
 
-training_dataset = tf.keras.utils.image_dataset_from_directory('/kaggle/input/new-plant-diseases-dataset/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/train',
-                                                             labels="inferred",
+# Prepare training dataset
+training_dataset = tf.keras.utils.image_dataset_from_directory(
+    path + '/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/train',
+    labels="inferred",
     label_mode="categorical",
     class_names=None,
     color_mode="rgb",
@@ -31,13 +38,12 @@ training_dataset = tf.keras.utils.image_dataset_from_directory('/kaggle/input/ne
     image_size=(128, 128),
     shuffle=True,
     seed=None,
-    validation_split=None,
-    subset=None,
-    interpolation="bilinear",
-    follow_links=False,
-    crop_to_aspect_ratio=False)
+    validation_split=None
+)
 
-validation_set = tf.keras.utils.image_dataset_from_directory('/kaggle/input/new-plant-diseases-dataset/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/valid',
+# Prepare validation set
+validation_set = tf.keras.utils.image_dataset_from_directory(
+    path + '/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/valid',
     labels="inferred",
     label_mode="categorical",
     class_names=None,
@@ -53,101 +59,94 @@ validation_set = tf.keras.utils.image_dataset_from_directory('/kaggle/input/new-
     crop_to_aspect_ratio=False
 )
 
+# Display batch shape/type
 for images, labels in training_dataset.take(1):
     print(images.shape)
     print(images.dtype)
     print(labels.shape)
     print(labels.dtype)
 
+# Define model
 cnn = tf.keras.models.Sequential()
 
-cnn.add(tf.keras.layers.Conv2D(filters=32,kernel_size=3,padding='same',activation='relu',input_shape=[128,128,3]))
-cnn.add(tf.keras.layers.Conv2D(filters=32,kernel_size=3,activation='relu'))
-cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+cnn.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu', input_shape=[128, 128, 3]))
+cnn.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
 
-cnn.add(tf.keras.layers.Conv2D(filters=64,kernel_size=3,padding='same',activation='relu'))
-cnn.add(tf.keras.layers.Conv2D(filters=64,kernel_size=3,activation='relu'))
-cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+cnn.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
+cnn.add(tf.keras.layers.Dropout(0.5))
 
-cnn.add(tf.keras.layers.Conv2D(filters=128,kernel_size=3,padding='same',activation='relu'))
-cnn.add(tf.keras.layers.Conv2D(filters=128,kernel_size=3,activation='relu'))
-cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+cnn.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
 
-cnn.add(tf.keras.layers.Conv2D(filters=256,kernel_size=3,padding='same',activation='relu'))
-cnn.add(tf.keras.layers.Conv2D(filters=256,kernel_size=3,activation='relu'))
-cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+cnn.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding='same', activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
+cnn.add(tf.keras.layers.Dropout(0.6))
 
-cnn.add(tf.keras.layers.Conv2D(filters=512,kernel_size=3,padding='same',activation='relu'))
-cnn.add(tf.keras.layers.Conv2D(filters=512,kernel_size=3,activation='relu'))
-cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+cnn.add(tf.keras.layers.Conv2D(filters=512, kernel_size=3, padding='same', activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=512, kernel_size=3, activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
 
 cnn.add(tf.keras.layers.Dropout(0.25))
-
 cnn.add(tf.keras.layers.Flatten())
-
-cnn.add(tf.keras.layers.Dense(units=1500,activation='relu'))
-
+cnn.add(tf.keras.layers.Dense(units=1500, activation='relu'))
 cnn.add(tf.keras.layers.Dropout(0.4)) #To avoid overfitting
 
-#Output Layer
-cnn.add(tf.keras.layers.Dense(units=38,activation='softmax'))
+# Output Layer
+cnn.add(tf.keras.layers.Dense(units=38, activation='softmax'))
 
-cnn.compile(optimizer=tf.keras.optimizers.Adam(
-    learning_rate=0.0001),loss='categorical_crossentropy',metrics=['accuracy'])
+cnn.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
 
 cnn.summary()
 
-training_history = cnn.fit(x=training_dataset,validation_data=validation_set,epochs=10)
+training_history = cnn.fit(
+    x=training_dataset,
+    validation_data=validation_set,
+    epochs=10
+)
 
-"""**Evaluating Model**
-
-"""
-
-#Training set Accuracy
-
+# Training set Accuracy
 train_loss, train_acc = cnn.evaluate(training_dataset)
 print('Training accuracy:', train_acc)
 
-#Validation set Accuracy
+# Validation set Accuracy
 val_loss, val_acc = cnn.evaluate(validation_set)
 print('Validation accuracy:', val_acc)
 
-"""***Saving Model***
-
-"""
-
+# Save Model
 cnn.save('trained_plant_disease_model.keras')
 
-training_history.history #Return Dictionary of history
-
-#Recording History in json
+# Save History as JSON
 import json
-with open('training_hist.json','w') as f:
-  json.dump(training_history.history,f)
+with open('training_hist.json', 'w') as f:
+    json.dump(training_history.history, f)
 
 print(training_history.history.keys())
 
-"""***Accuracy Visualization ***
-
-"""
-
-epochs = [i for i in range(1,11)]
-plt.plot(epochs,training_history.history['accuracy'],color='red',label='Training Accuracy')
-plt.plot(epochs,training_history.history['val_accuracy'],color='blue',label='Validation Accuracy')
+# Accuracy Visualization
+epochs = [i for i in range(1, 11)]
+plt.plot(epochs, training_history.history['accuracy'], color='red', label='Training Accuracy')
+plt.plot(epochs, training_history.history['val_accuracy'], color='blue', label='Validation Accuracy')
 plt.xlabel('No. of Epochs')
 plt.title('Visualization of Accuracy Result')
 plt.legend()
 plt.grid()
 plt.show()
 
-"""***Some other metrics for model evaluation***
-
-"""
-
+# Additional Metrics
 class_name = validation_set.class_names
 
+# Prepare test set
 test_set = tf.keras.utils.image_dataset_from_directory(
-    '/kaggle/input/new-plant-diseases-dataset/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/valid',
+    path + '/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/valid',
     labels="inferred",
     label_mode="categorical",
     class_names=None,
@@ -163,100 +162,47 @@ test_set = tf.keras.utils.image_dataset_from_directory(
     crop_to_aspect_ratio=False
 )
 
-y_pred = cnn.predict(test_set)
-predicted_categories = tf.argmax(y_pred, axis=1)
-
+# Get predictions and true categories
+y_pred = cnn.predict(test_set, verbose=1) # returns (num_samples, num_classes)
+predicted_categories = np.argmax(y_pred, axis=1)
 true_categories = tf.concat([y for x, y in test_set], axis=0)
 Y_true = tf.argmax(true_categories, axis=1)
 
-Y_true
+from sklearn.metrics import confusion_matrix, classification_report
+cm = confusion_matrix(Y_true, predicted_categories)
 
-predicted_categories
+# Precision Recall Fscore report
+print(classification_report(Y_true, predicted_categories, target_names=class_name))
 
-from sklearn.metrics import confusion_matrix,classification_report
-cm = confusion_matrix(Y_true,predicted_categories)
-
-# Precision Recall Fscore
-print(classification_report(Y_true,predicted_categories,target_names=class_name))
-
-"""***Confusion Matrix Visualization***
-
-"""
-
+# Confusion Matrix Visualization
 plt.figure(figsize=(40, 40))
-sns.heatmap(cm,annot=True,annot_kws={"size": 10})
-
-plt.xlabel('Predicted Class',fontsize = 20)
-plt.ylabel('Actual Class',fontsize = 20)
-plt.title('Plant Disease Prediction Confusion Matrix',fontsize = 25)
+sns.heatmap(cm, annot=True, annot_kws={"size": 10})
+plt.xlabel('Predicted Class', fontsize=20)
+plt.ylabel('Actual Class', fontsize=20)
+plt.title('Plant Disease Prediction Confusion Matrix', fontsize=25)
 plt.show()
 
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
-
-"""***Test set Image Processing***
-
-"""
-
-validation_set = tf.keras.utils.image_dataset_from_directory(
-    '/kaggle/input/new-plant-diseases-dataset/new plant diseases dataset(augmented)/New Plant Diseases Dataset(Augmented)/valid',
-    labels="inferred",
-    label_mode="categorical",
-    class_names=None,
-    color_mode="rgb",
-    batch_size=32,
-    image_size=(128, 128),
-    shuffle=True,
-    seed=None,
-    validation_split=None,
-    subset=None,
-    interpolation="bilinear",
-    follow_links=False,
-    crop_to_aspect_ratio=False
-)
-class_name = validation_set.class_names
-print(class_name)
-
-"""***Loading Model***
-
-
-"""
-
+# Reload model
 cnn = tf.keras.models.load_model('trained_plant_disease_model.keras')
 
-"""***Visualising and Performing Prediction on Single image***
-
-
-"""
-
-#Test Image Visualization
+# Test set Image Processing
 import cv2
-image_path = '/kaggle/input/new-plant-diseases-dataset/test/test/AppleCedarRust1.JPG'
-# Reading an image in default mode
+image_path = path + '/test/test/AppleCedarRust1.JPG'
 img = cv2.imread(image_path)
-img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB) #Converting BGR to RGB
-# Displaying the image
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 plt.imshow(img)
 plt.title('Test Image')
 plt.xticks([])
 plt.yticks([])
 plt.show()
 
-"""***Testing Model***
-
-
-"""
-
-image = tf.keras.preprocessing.image.load_img(image_path,target_size=(128,128))
+image = tf.keras.preprocessing.image.load_img(image_path, target_size=(128, 128))
 input_arr = tf.keras.preprocessing.image.img_to_array(image)
-input_arr = np.array([input_arr])  # Convert single image to a batch.
+input_arr = np.array([input_arr]) # Convert single image to a batch.
 predictions = cnn.predict(input_arr)
-
 print(predictions)
 
-result_index = np.argmax(predictions) #Return index of max element
+result_index = np.argmax(predictions)
 print(result_index)
 
 # Displaying the disease prediction
