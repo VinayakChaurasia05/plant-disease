@@ -1,0 +1,20 @@
+This is a placeholder file named trained_plant_disease_model.keras.
+
+WARNING: This placeholder is NOT a real Keras model; it was created because TensorFlow is not installed in this environment and training cannot be performed here.
+
+To produce an actual trained model file locally, run the included `create_model.py` (which builds the architecture) and then train it on your dataset, or run `python create_model.py` after installing TensorFlow to save an (untrained) architecture. To train, modify `create_model.py` to load data and call `model.fit(...)` then `model.save('trained_plant_disease_model.keras')`.
+
+If you want me to generate a real `.keras` model file (untrained or trained), grant permission to install TensorFlow here or allow me to run in a cloud environment with proper credentials and dataset access.
+
+Steps to create a real model locally (recommended):
+1) Create a Python venv with a compatible Python version (3.10 or 3.11 recommended):
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+2) Upgrade pip and install dependencies:
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   # If requirements pin fails, do: python -m pip install tensorflow
+3) Run the model creation (and training) script:
+   python .\create_model.py
+
+After running, `trained_plant_disease_model.keras` will appear in this folder.
